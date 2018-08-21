@@ -1,5 +1,5 @@
-local name = ngx.var.arg_name or "Anonymous 123 o kurde"
-ngx.say("Hello, ", name, "fajnie")
+local oldreq = require
+local require = function(s) return oldreq('lua.lib.' .. s) end
 
 local open = io.open
 local function read_file(path)
@@ -17,3 +17,9 @@ local function write_file(path, content)
     f:write(content)
     f:close()
 end
+
+
+ngx.header['content-type'] = 'text/html'
+
+local template = require "template"
+template.render(read_file "/lua/view.html", { message = "Hello, World!" })
