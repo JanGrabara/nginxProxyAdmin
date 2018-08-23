@@ -1,31 +1,60 @@
 <!DOCTYPE html>
 <html>
 
+<head>
+    <style>
+        .ace-editor {
+            height: 250px;
+        }
+
+        form {
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+
 <body>
-    <h1>{{message}}</h1>
+    <h2>add file</h2>
+    <form action="/addFile" method="POST">
+        <label>
+            file name
+            <input type="text" name="file-name">
+            <button type="submit">add</button>
+        </label>
+        <div class="ace-editor"></div>
+        <input type="hidden" name="content">
+    </form>
+
+    <h2>Existing files</h2>
+    {% for _,file in ipairs(files) do %}
+    <form action="editFile" method="POST">
+        <span>{{file.file}}</span>
+        <button type="submit">update</button>
+        <input type="hidden" value="{{file.file}}">
+        <div class="ace-editor">{{file.content}}</div>
+        <input type="hidden" name="{{file.file}}">
+    </form>
 </body>
-
-<h2>add file</h2>
-<form action="/addFile" method="POST">
-    <label>
-        file name
-        <input type="text" name="file-name">
-    </label>
-    <textarea name="content"></textarea>
-    <button type="submit">add</button>
-</form>
-
-{% for _,file in ipairs(files) do %}
-
-<form action="editFile" method="POST">
-    <p>{{file.file}}</p>
-    <input type="hidden" value="{{file.file}}">
-    <textarea name="{{file.file}}">{{file.content}}</textarea>
-    <button type="submit">update</button>
-</form>
 
 {% end %}
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.1/ace.js"></script>
+
+<script>
+    document.querySelectorAll('.ace-editor').forEach(node => {
+        const editor = ace.edit(node)
+        editor.setTheme("ace/theme/monokai")
+        editor.setOptions({
+            fontSize: "14px"
+        });
+        // editor.session.setMode("ace/mode/javascript")
+        node.nextElementSibling.value = editor.getSession().getValue()
+        editor.getSession().on('change', () => {
+            node.nextElementSibling.value = editor.getSession().getValue()
+        })
+
+    })
+</script>
 
 
 </html>
