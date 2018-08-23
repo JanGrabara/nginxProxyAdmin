@@ -3,9 +3,8 @@ local require = function(s)
     return oldreq("lua.lib." .. s)
 end
 
-local open = io.open
 local function read_file(path)
-    local file = open(path, "r+b") -- r read mode and b binary mode
+    local file = io.open(path, "r+b") -- r read mode and b binary mode
     if not file then
         return "nil"
     end
@@ -31,21 +30,40 @@ function scandir(directory)
     return t
 end
 
+
+function printView()
+    ngx.header["content-type"] = "text/html"
+
+    local template = require "template"
+
+    local files = {}
+    for _, file in ipairs(scandir "/etc/nginx/conf.d") do
+        if file ~= "." and file ~= ".." then
+            table.insert(files, {file = file, content = read_file("/etc/nginx/conf.d/" .. file)})
+        end
+    end
+    template.render(read_file "/lua/view.html", {files = files, message = message})
+end
+
+local message = ""
+
 if (ngx.var.request_uri == "/editFile") then
     ngx.req.read_body()
     local args, err = ngx.req.get_post_args()
-
     if err == "truncated" then
+        message = "error=truncated"
+        return
     -- one can choose to ignore or reject the current request here
     end
 
     if not args then
-        ngx.say("failed to get post args: ", err)
+        message = "failed to get post args: " .. err
         return
     end
     for key, val in pairs(args) do
             path = "/etc/nginx/conf.d/" .. key
             write_file(path, val)
+            message = message .. ";edited file" .. key
     end
 end
 
@@ -54,31 +72,26 @@ if (ngx.var.request_uri == "/addFile") then
     local args, err = ngx.req.get_post_args()
 
     if err == "truncated" then
-    -- one can choose to ignore or reject the current request here
+        message = "error=truncated"
     end
 
     if not args then
-        ngx.say("failed to get post args: ", err)
+        message = "failed to get post args: " .. err
         return
     end
     local content
     local fileName
-
     for key, val in pairs(args) do
         if key == "file-name" then fileName = val end
         if key == "content" then content = val end
     end
     write_file("/etc/nginx/conf.d/" .. fileName, content)
+    message = "added file" .. fileName
 end
 
-ngx.header["content-type"] = "text/html"
-
-local template = require "template"
-
-local files = {}
-for _, file in ipairs(scandir "/etc/nginx/conf.d") do
-    if file ~= "." and file ~= ".." then
-        table.insert(files, {file = file, content = read_file("/etc/nginx/conf.d/" .. file)})
-    end
+if ngx.var.request_method ~= "GET" then
+    ngx.redirect("/")
+else
+    printView()
 end
-template.render(read_file "/lua/view.html", {files = files})
+
