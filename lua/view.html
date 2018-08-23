@@ -40,6 +40,10 @@
         <div class="ace-editor">{{file.content}}</div>
         <input type="hidden" name="{{file.file}}">
     </form>
+
+    <form action="/command" method="POST">
+        <button type="cmd">cmd</button>
+    </form>
 </body>
 
 {% end %}

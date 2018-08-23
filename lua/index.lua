@@ -62,6 +62,11 @@ if (ngx.var.request_uri == "/addFile") then
     message = "added file" .. fileName
 end
 
+if (ngx.var.request_uri == "/command" and ngx.var.request_method == "POST") then
+    os.execute("nginx -s reload")
+end
+
+
 if ngx.var.request_method ~= "GET" then
     ngx.redirect("/")
 else
