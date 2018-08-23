@@ -19,7 +19,7 @@
 <form action="editFile">
     <p>{{file.file}}</p>
     <input type="hidden" value="{{file.file}}">
-    <textarea name="content">{{file.content}}</textarea>
+    <textarea name="{{file.file}}">{{file.content}}</textarea>
     <button type="submit">update</button>
 </form>
 
