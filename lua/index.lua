@@ -41,7 +41,3 @@ for _, file in ipairs(scandir "/etc/nginx/conf.d") do
     end
 end
 template.render(read_file "/lua/view.html", { files = files })
-
-
-
-
