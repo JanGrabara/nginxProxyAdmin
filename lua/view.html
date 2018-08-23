@@ -16,7 +16,7 @@
 
 {% for _,file in ipairs(files) do %}
 
-<form action="editFile">
+<form action="editFile" method="POST">
     <p>{{file.file}}</p>
     <input type="hidden" value="{{file.file}}">
     <textarea name="{{file.file}}">{{file.content}}</textarea>

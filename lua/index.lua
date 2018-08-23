@@ -31,12 +31,17 @@ function scandir(directory)
     return t
 end
 
-local args, err = ngx.req.get_uri_args()
+ngx.req.read_body()
+local args, err = ngx.req.get_post_args()
 
 if err == "truncated" then
 -- one can choose to ignore or reject the current request here
 end
 
+if not args then
+    ngx.say("failed to get post args: ", err)
+    return
+end
 for key, val in pairs(args) do
     if type(val) == "table" then
     else
