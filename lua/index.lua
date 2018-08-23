@@ -31,23 +31,44 @@ function scandir(directory)
     return t
 end
 
-ngx.req.read_body()
-local args, err = ngx.req.get_post_args()
+if (ngx.var.request_uri == "/editFile") then
+    ngx.req.read_body()
+    local args, err = ngx.req.get_post_args()
 
-if err == "truncated" then
--- one can choose to ignore or reject the current request here
-end
-
-if not args then
-    ngx.say("failed to get post args: ", err)
-    return
-end
-for key, val in pairs(args) do
-    if type(val) == "table" then
-    else
-        path = "/etc/nginx/conf.d/" .. key
-        write_file(path, val)
+    if err == "truncated" then
+    -- one can choose to ignore or reject the current request here
     end
+
+    if not args then
+        ngx.say("failed to get post args: ", err)
+        return
+    end
+    for key, val in pairs(args) do
+            path = "/etc/nginx/conf.d/" .. key
+            write_file(path, val)
+    end
+end
+
+if (ngx.var.request_uri == "/addFile") then
+    ngx.req.read_body()
+    local args, err = ngx.req.get_post_args()
+
+    if err == "truncated" then
+    -- one can choose to ignore or reject the current request here
+    end
+
+    if not args then
+        ngx.say("failed to get post args: ", err)
+        return
+    end
+    local content
+    local fileName
+
+    for key, val in pairs(args) do
+        if key == "file-name" then fileName = val end
+        if key == "content" then content = val end
+    end
+    write_file("/etc/nginx/conf.d/" .. fileName, content)
 end
 
 ngx.header["content-type"] = "text/html"
