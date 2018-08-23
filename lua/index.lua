@@ -1,48 +1,21 @@
 local oldreq = require
 local require = function(s)
-    return oldreq("lua.lib." .. s)
+    return oldreq("lua." .. s)
 end
-
-local function read_file(path)
-    local file = io.open(path, "r+b") -- r read mode and b binary mode
-    if not file then
-        return "nil"
-    end
-    local content = file:read "*a" -- *a or *all reads the whole file
-    file:close()
-    return content
-end
-
-local function write_file(path, content)
-    f = io.open(path, "w")
-    f:write(content)
-    f:close()
-end
-
-function scandir(directory)
-    local i, t, popen = 0, {}, io.popen
-    local pfile = popen('ls -a "' .. directory .. '"')
-    for filename in pfile:lines() do
-        i = i + 1
-        t[i] = filename
-    end
-    pfile:close()
-    return t
-end
-
+local File = require "file"
 
 function printView()
     ngx.header["content-type"] = "text/html"
 
-    local template = require "template"
+    local template = require "lib.template"
 
     local files = {}
-    for _, file in ipairs(scandir "/etc/nginx/conf.d") do
+    for _, file in ipairs(File.scandir "/etc/nginx/conf.d") do
         if file ~= "." and file ~= ".." then
-            table.insert(files, {file = file, content = read_file("/etc/nginx/conf.d/" .. file)})
+            table.insert(files, {file = file, content = File.read_file("/etc/nginx/conf.d/" .. file)})
         end
     end
-    template.render(read_file "/lua/view.html", {files = files, message = message})
+    template.render(File.read_file "/lua/view.html", {files = files, message = message})
 end
 
 local message = ""
@@ -62,7 +35,7 @@ if (ngx.var.request_uri == "/editFile") then
     end
     for key, val in pairs(args) do
             path = "/etc/nginx/conf.d/" .. key
-            write_file(path, val)
+            File.write_file(path, val)
             message = message .. ";edited file" .. key
     end
 end
@@ -85,7 +58,7 @@ if (ngx.var.request_uri == "/addFile") then
         if key == "file-name" then fileName = val end
         if key == "content" then content = val end
     end
-    write_file("/etc/nginx/conf.d/" .. fileName, content)
+    File.write_file("/etc/nginx/conf.d/" .. fileName, content)
     message = "added file" .. fileName
 end
 
