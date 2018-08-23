@@ -6,10 +6,6 @@
         .ace-editor {
             height: 250px;
         }
-
-        form {
-            margin-bottom: 25px;
-        }
         .message {
             border: 1px solid black;
             padding: 10px;
@@ -33,6 +29,10 @@
 
     <h2>Existing files</h2>
     {% for _,file in ipairs(files) do %}
+    <form action="deleteFile" method="POST">
+        <input type="hidden" name="file-name" value="{{file.file}}">
+        <button>delete</button>
+    </form>
     <form action="editFile" method="POST">
         <span>{{file.file}}</span>
         <button type="submit">update</button>

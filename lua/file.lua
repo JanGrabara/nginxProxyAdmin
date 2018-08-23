@@ -27,4 +27,8 @@ function fileModule.scandir(directory)
     return t
 end
 
+function fileModule.delete(path)
+    os.remove(path)
+end
+
 return fileModule

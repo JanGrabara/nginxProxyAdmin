@@ -62,6 +62,23 @@ if (ngx.var.request_uri == "/addFile") then
     message = "added file" .. fileName
 end
 
+if (ngx.var.request_uri == "/deleteFile") then
+    ngx.req.read_body()
+    local args, err = ngx.req.get_post_args()
+
+    if err == "truncated" then
+        message = "error=truncated"
+    end
+
+    if not args then
+        message = "failed to get post args: " .. err
+        return
+    end
+    File.delete("/etc/nginx/conf.d/" .. args['file-name'])
+    message = "removedFile file" .. args['file-name']
+end
+
+
 if ngx.var.request_method ~= "GET" then
     ngx.redirect("/")
 else
