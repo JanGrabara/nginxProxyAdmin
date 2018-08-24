@@ -1,14 +1,38 @@
+
+package.path = package.path .. ";/lua/lib/?.lua"
+
 local oldreq = require
 local require = function(s)
     return oldreq("lua." .. s)
 end
+
+local template = require "lib.template"
 local File = require "file"
+
+
+require "checkLogin"()
+
+
+-- if (ngx.var.request_uri == "/start") then
+--     local session = require "lib.resty.session".start()
+--     ngx.say(session.data.name)
+--     session.data.name = "asd"
+--     session:save()
+--     ngx.header["content-type"] = "text/html"
+--     ngx.say("<a href=/test>Check if it is working</a>")
+-- end
+
+-- if (ngx.var.request_uri == "/test") then
+--     local session = require "lib.resty.session".open()
+--     ngx.say(session.data.name)
+
+-- end
+
+
+
 
 function printView()
     ngx.header["content-type"] = "text/html"
-
-    local template = require "lib.template"
-
     local files = {}
     for _, file in ipairs(File.scandir "/etc/nginx/conf.d") do
         if file ~= "." and file ~= ".." then
@@ -19,6 +43,13 @@ function printView()
 end
 
 local message = ""
+
+
+if (ngx.var.request_uri == "/login") then
+
+
+end
+
 
 if (ngx.var.request_uri == "/editFile") then
     ngx.req.read_body()
@@ -84,4 +115,3 @@ if ngx.var.request_method ~= "GET" then
 else
     printView()
 end
-
