@@ -66,12 +66,11 @@ if (ngx.var.request_uri == "/deleteFile") then
     File.delete("/etc/nginx/conf.d/" .. args['file-name'])
 end
 if (ngx.var.request_uri == "/command" and ngx.var.request_method == "POST") then
-    os.execute("nginx -s reload")
+    os.execute("/usr/local/openresty/nginx/sbin/nginx -s reload")
 end
 
-
 if ngx.var.request_method ~= "GET" then
-    ngx.redirect("/")
+   ngx.redirect("/")
 else
     printView()
 end
