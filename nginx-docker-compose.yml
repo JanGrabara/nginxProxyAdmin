@@ -2,9 +2,9 @@ version: '2'
 
 services:
   proxy:
-    image: valian/docker-nginx-auto-ssl
+    build: ./
     volumes:
-    - ./nginx.conf:/etc/nginx/conf.d
+    - ./configs:/etc/nginx/conf.d
     - ./lua:/lua
     environment:
     - FORCE_HTTPS=false

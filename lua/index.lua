@@ -24,13 +24,6 @@ function printView()
 end
 
 
-
-if (ngx.var.request_uri == "/login") then
-
-
-end
-
-
 if (ngx.var.request_uri == "/editFile") then
     ngx.req.read_body()
     local args, err = ngx.req.get_post_args()
