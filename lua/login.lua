@@ -8,10 +8,13 @@ end
 
 local session = require "lib.resty.session".start()
 
+
 local template = require "lib.template"
 local File = require "file"
 
 if ngx.var.request_method == "GET" then
+    session.data = {}
+    session:save()
     template.render(File.read_file "/lua/login.html", {})
 end
 

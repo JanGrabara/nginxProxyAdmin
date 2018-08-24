@@ -12,25 +12,6 @@ local File = require "file"
 
 require "checkLogin"()
 
-
--- if (ngx.var.request_uri == "/start") then
---     local session = require "lib.resty.session".start()
---     ngx.say(session.data.name)
---     session.data.name = "asd"
---     session:save()
---     ngx.header["content-type"] = "text/html"
---     ngx.say("<a href=/test>Check if it is working</a>")
--- end
-
--- if (ngx.var.request_uri == "/test") then
---     local session = require "lib.resty.session".open()
---     ngx.say(session.data.name)
-
--- end
-
-
-
-
 function printView()
     ngx.header["content-type"] = "text/html"
     local files = {}
@@ -42,7 +23,6 @@ function printView()
     template.render(File.read_file "/lua/view.html", {files = files, message = message})
 end
 
-local message = ""
 
 
 if (ngx.var.request_uri == "/login") then
@@ -54,20 +34,14 @@ end
 if (ngx.var.request_uri == "/editFile") then
     ngx.req.read_body()
     local args, err = ngx.req.get_post_args()
-    if err == "truncated" then
-        message = "error=truncated"
-        return
-    -- one can choose to ignore or reject the current request here
-    end
+
 
     if not args then
-        message = "failed to get post args: " .. err
         return
     end
     for key, val in pairs(args) do
             path = "/etc/nginx/conf.d/" .. key
             File.write_file(path, val)
-            message = message .. ";edited file" .. key
     end
 end
 
@@ -90,23 +64,16 @@ if (ngx.var.request_uri == "/addFile") then
         if key == "content" then content = val end
     end
     File.write_file("/etc/nginx/conf.d/" .. fileName, content)
-    message = "added file" .. fileName
 end
 
 if (ngx.var.request_uri == "/deleteFile") then
     ngx.req.read_body()
     local args, err = ngx.req.get_post_args()
 
-    if err == "truncated" then
-        message = "error=truncated"
-    end
-
-    if not args then
-        message = "failed to get post args: " .. err
-        return
-    end
     File.delete("/etc/nginx/conf.d/" .. args['file-name'])
-    message = "removedFile file" .. args['file-name']
+end
+if (ngx.var.request_uri == "/command" and ngx.var.request_method == "POST") then
+    os.execute("nginx -s reload")
 end
 
 
