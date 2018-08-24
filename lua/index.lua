@@ -9,8 +9,9 @@ end
 local template = require "lib.template"
 local File = require "file"
 
-
+local session = require "lib.resty.session".start()
 require "checkLogin"()
+
 
 function printView()
     ngx.header["content-type"] = "text/html"
@@ -20,6 +21,9 @@ function printView()
             table.insert(files, {file = file, content = File.read_file("/etc/nginx/conf.d/" .. file)})
         end
     end
+    local message = session.data.message
+    session.data.message = nil
+    session:save()
     template.render(File.read_file "/lua/view.html", {files = files, message = message})
 end
 
@@ -66,7 +70,10 @@ if (ngx.var.request_uri == "/deleteFile") then
     File.delete("/etc/nginx/conf.d/" .. args['file-name'])
 end
 if (ngx.var.request_uri == "/command" and ngx.var.request_method == "POST") then
-    os.execute("/usr/local/openresty/nginx/sbin/nginx -s reload")
+    local f = io.popen("/usr/local/openresty/nginx/sbin/nginx -s reload 2>&1")
+    session.data.message = f:read("*a")
+    f:close()
+    session:save()
 end
 
 if ngx.var.request_method ~= "GET" then

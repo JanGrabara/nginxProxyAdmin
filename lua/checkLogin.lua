@@ -1,6 +1,5 @@
 
-
-local session = require "lua.lib.resty.session".start()
+local session = require "lua.lib.resty.session".open()
 
 return function(nxg)
     ngx.log(ngx.NOTICE, "")
