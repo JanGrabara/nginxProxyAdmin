@@ -8,6 +8,8 @@ services:
     - ./lua:/lua
     environment:
     - FORCE_HTTPS=false
+    - USERNAME=admin
+    - PASSWORD=test1
     ports:
       - 80:80
       - 8080:8080

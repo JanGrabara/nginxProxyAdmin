@@ -21,8 +21,7 @@ end
 if ngx.var.request_method == "POST" then
     ngx.req.read_body()
     local args, err = ngx.req.get_post_args()
-
-    if (args["login"] == "admin" and args["password"] == "admin") then
+    if (args["login"] == os.getenv("USERNAME") and args["password"] == os.getenv("PASSWORD")) then
         session.data.logedIn = true
         session:save()
         ngx.redirect("/")
