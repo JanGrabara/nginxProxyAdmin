@@ -2,14 +2,13 @@ version: '2'
 
 services:
   proxy:
-    build: ./
+    image: proxylua
     volumes:
     - ./configs:/etc/nginx/conf.d
-    - ./lua:/lua
+    env_file:
+     - ./api.env
     environment:
     - FORCE_HTTPS=false
-    - USERNAME=admin
-    - PASSWORD=test1
     ports:
       - 80:80
       - 8080:8080
