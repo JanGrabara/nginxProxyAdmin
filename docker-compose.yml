@@ -2,9 +2,7 @@ version: '2'
 
 services:
   proxy:
-    image: proxylua
-    volumes:
-    - ./configs:/etc/nginx/conf.d
+    image: griffith95/proxylua
     env_file:
      - ./api.env
     environment:
