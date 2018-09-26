@@ -1,32 +1,72 @@
 
 package.path = package.path .. ";/lua/lib/?.lua"
 
-local oldreq = require
-local require = function(s)
-    return oldreq("lua." .. s)
+local route = require "resty.route".new()
+local session = require "resty.session".start()
+local cjson = require "cjson"
+local File = require "lua.file"
+
+function badRequest (self, message)
+    ngx.status = ngx.HTTP_BAD_REQUEST
+    self:json({ error = message })
 end
 
-local session = require "lib.resty.session".start()
-
-
-local template = require "lib.template"
-local File = require "file"
-
-if ngx.var.request_method == "GET" then
-    session.data = {}
-    session:save()
-    template.render(File.read_file "/lua/login.html", {})
+function unotharized (self, message)
+    ngx.status = ngx.HTTP_UNAUTHORIZED
+    self:json({ error = message })
 end
 
-if ngx.var.request_method == "POST" then
+
+
+route:use(function(router)
+    router.badRequest = badRequest
+    router.unotharized = unotharized
     ngx.req.read_body()
-    local args, err = ngx.req.get_post_args()
-    if (args["login"] == os.getenv("USERNAME") and args["password"] == os.getenv("PASSWORD")) then
+    local data = ngx.req.get_body_data()
+    if data ~= nil then
+        router.body = cjson.decode(data)
+    end
+    router.yield()
+end)
+
+route:post "/api/login" (function(router)
+    local body = router.body
+    if(body == nil) then
+        return router:badRequest("invalid credidentials")
+    end
+    if (body.secret == os.getenv("PASSWORD")) then
         session.data.logedIn = true
         session:save()
-        ngx.redirect("/")
+        router:json({ ok = true })
     else
-        ngx.redirect("/login")
+        return router:badRequest("invalid credidentials")
     end
+end)
 
-end
+route:post "=/api/logout" (function(router)
+    session.data = nil
+    session:save()
+    router:json({ ok = true })
+end)
+
+route:use "/api/file" (function(router)
+    if(not session.data.logedIn) then
+        return router:unotharized("not loged in")
+    else
+        router:yield()
+    end
+end)
+
+route:get "=/api/file" (function(router)
+    local fileList = File.scandir "/etc/nginx/conf.d"
+    router:json(File.scandir "/etc/nginx/conf.d")
+end)
+
+route:get "#/api/file/(%w+)" (function(router, name)
+    local fileList = File.scandir "/etc/nginx/conf.d"
+    local content = File.read_file("/etc/nginx/conf.d/" .. name)
+    ngx.say("\"" .. content .. "\"")
+end)
+
+
+route:dispatch (ngx.var.request_uri, ngx.var.request_method)

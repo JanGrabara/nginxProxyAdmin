@@ -17,14 +17,13 @@ function fileModule.write_file(path, content)
 end
 
 function fileModule.scandir(directory)
-    local i, t, popen = 0, {}, io.popen
-    local pfile = popen('ls -a "' .. directory .. '"')
-    for filename in pfile:lines() do
-        i = i + 1
-        t[i] = filename
+    local files = {}
+    local pfile = io.popen('ls "' .. directory .. '"')
+    for fileName in pfile:lines() do
+        table.insert( files, fileName )
     end
     pfile:close()
-    return t
+    return files
 end
 
 function fileModule.delete(path)

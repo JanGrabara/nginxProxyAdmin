@@ -1,0 +1,43 @@
+.text-danger {
+  color: red;
+}
+
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.login-page fieldset {
+  display: flex;
+}
+.login-page form button {
+  width: 100%;
+  margin-left: 0;
+}
+.login-page .input-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.login-page .login-button {
+  height: 50px;
+}
+
+.login-page .login-button > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-page .login-button .spinner {
+  margin: 0;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+}

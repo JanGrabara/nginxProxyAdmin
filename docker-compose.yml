@@ -2,11 +2,13 @@ version: '2'
 
 services:
   proxy:
-    image: griffith95/proxylua
+    build: .
     env_file:
      - ./api.env
     environment:
     - FORCE_HTTPS=false
+    volumes:
+    - ./lua:/lua
     ports:
       - 80:80
       - 8080:8080
