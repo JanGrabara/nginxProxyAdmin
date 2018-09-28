@@ -15,6 +15,14 @@ type alias OkResult =
     { ok : Bool }
 
 
+type alias UpdateFileContent =
+    { content : String }
+
+
+encodeUpdateFileContent content =
+    (Json.Encode.object [ ( "content", Json.Encode.string <| content ) ]) |> Http.jsonBody
+
+
 okDecoder =
     Decode.succeed OkResult
         |> required "ok" Decode.bool
@@ -49,12 +57,21 @@ logout =
 
 fileList : Http.Request (List String)
 fileList =
-    get (buildUrl [ "file" ] []) stringListDecoder 
+    get (buildUrl [ "file" ] []) stringListDecoder
+
 
 getFile : String -> Http.Request String
 getFile fileName =
-    get (buildUrl [ "file", fileName ] []) Decode.string
+    getString (buildUrl [ "file", fileName ] [])
 
+
+updateFile : String -> String -> Http.Request OkResult
+updateFile fileName content =
+    put (buildUrl [ "file", fileName ] []) (encodeUpdateFileContent content) okDecoder
+
+deleteFile: String -> Http.Request OkResult
+deleteFile fileName =
+    delete (buildUrl [ "file", fileName ] []) Http.emptyBody okDecoder
 
 request :
     { body : Http.Body
@@ -100,10 +117,42 @@ get url decoder =
         }
 
 
+getString : Endpoint -> Http.Request String
+getString url =
+    request
+        { method = "GET"
+        , url = url
+        , expect = Http.expectString
+        , headers = jsonHeaders
+        , body = Http.emptyBody
+        }
+
+
 post : Endpoint -> Body -> Decoder a -> Http.Request a
 post url body decoder =
     request
         { method = "POST"
+        , url = url
+        , expect = Http.expectJson decoder
+        , headers = jsonHeaders
+        , body = body
+        }
+
+
+put : Endpoint -> Body -> Decoder a -> Http.Request a
+put url body decoder =
+    request
+        { method = "PUT"
+        , url = url
+        , expect = Http.expectJson decoder
+        , headers = jsonHeaders
+        , body = body
+        }
+
+delete : Endpoint -> Body -> Decoder a -> Http.Request a
+delete url body decoder =
+    request
+        { method = "DELETE"
         , url = url
         , expect = Http.expectJson decoder
         , headers = jsonHeaders
@@ -122,14 +171,4 @@ post url body decoder =
 --         , body = body
 --         , timeout = Nothing
 --         , withCredentials = False
---         }
--- delete : Endpoint -> Cred -> Body -> Decoder a -> Http.Request a
--- delete url cred body decoder =
---     request
---         { method = "DELETE"
---         , url = url
---         , expect = Http.expectJson decoder
---         , headers = jsonHeaders
---         , body = body
---         , timeout = Nothing
 --         }

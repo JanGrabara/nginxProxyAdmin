@@ -62,10 +62,24 @@ route:get "=/api/file" (function(router)
     router:json(File.scandir "/etc/nginx/conf.d")
 end)
 
-route:get "#/api/file/(%w+)" (function(router, name)
-    local fileList = File.scandir "/etc/nginx/conf.d"
-    local content = File.read_file("/etc/nginx/conf.d/" .. name)
-    ngx.say("\"" .. content .. "\"")
+
+function filePath(fileName)
+    return "/etc/nginx/conf.d/" .. ngx.unescape_uri(fileName)
+end
+
+route:get "#/api/file/(.+)" (function(router, name)
+    local content = File.read_file(filePath(name))
+    ngx.say(content)
+end)
+
+route:put "#/api/file/(.+)" (function(router, name)
+    File.write_file(filePath(name), router.body.content)
+    router:json({ ok = true })
+end)
+
+route:delete "#/api/file/(.+)" (function(router, name)
+    File.delete(filePath(name))
+    router:json({ ok = true })
 end)
 
 

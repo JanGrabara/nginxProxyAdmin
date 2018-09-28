@@ -137,9 +137,12 @@ changeRouteTo route model =
             Router.Login ->
                 ( Page.LoginPage.initialModel session |> Login, Cmd.none )
 
-            Router.FileDetails file ->
-                ( Page.FileDetails.initialModel session |> FileDetails |> MainRoute
-                , Page.FileDetails.initialCmd file |> Cmd.map FileDetailsMessage
+            Router.FileDetails file isNew ->
+                ( Page.FileDetails.initialModel session file |> FileDetails |> MainRoute
+                , if isNew then
+                    Cmd.none
+                  else
+                    Page.FileDetails.initialCmd file |> Cmd.map FileDetailsMessage
                 )
 
             Router.FileList ->
@@ -190,7 +193,7 @@ mainView model =
         [ nav
         , case model of
             FileList fileListModel ->
-                Page.FileList.view fileListModel
+                Page.FileList.view fileListModel |> Html.map FileListMessage
 
             FileDetails fileDetailsModel ->
                 Page.FileDetails.view fileDetailsModel |> Html.map FileDetailsMessage

@@ -12,53 +12,12 @@
     -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
     <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.40.2/lib/codemirror.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.40.2/mode/nginx/nginx.js"></script>
-    <link rel="stylesheet" href="https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.0/dist/mini-default.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.40.2/lib/codemirror.css">
     <title>Elm App</title>
 </head>
-
 <body>
     <noscript>
         You need to enable JavaScript to run this app.
     </noscript>
     <div id="root"></div>
 </body>
-
-<script>
-    class CodeMirrorEditorElement extends HTMLElement {
-        connectedCallback() {
-            console.log('ctor')
-            this.editor = CodeMirror(this, {
-                value: this._val || '',
-                indentUnit: 4,
-                lineNumbers: true,
-                mode: "text/x-nginx-conf"
-            })
-            this.editor.on('changes', (instance, changes) => {
-                this._val = this.editor.getValue()
-                this.dispatchEvent(new CustomEvent('editorChanged'))
-            })
-
-        }
-
-        get editorValue() {
-            console.log('get val')
-            return this._val
-        }
-
-        set editorValue(val) {
-            if (this._val === val) return
-            this._val = val
-            if (this.editor) {
-                this.editor.setValue(val)
-            }
-        }
-    }
-
-    customElements.define('code-mirror-editor', CodeMirrorEditorElement)
-
-</script>
-
 </html>

@@ -1,30 +1,39 @@
 module Page.FileDetails exposing (..)
 
-import Session exposing (Session)
+import Session exposing (Session, navKey)
 import Http
 import Api
 import Html exposing (..)
 import Json.Decode
 import Json.Encode
 import Html.Events
-import Html.Attributes
+import Html.Attributes exposing(..)
 import Debug exposing (log)
+import Router
 
 
 type alias Model =
     { session : Session
     , fileContent : String
+    , fileName : String
     }
 
 
 type Msg
     = FileLoaded (Result Http.Error String)
     | CodeChanged String
+    | UpdateFile
+    | FileUpdated (Result Http.Error Api.OkResult)
+    | DeleteFile
+    | FileDeleted (Result Http.Error Api.OkResult)
 
 
-initialModel : Session -> Model
-initialModel session =
-    { session = session, fileContent = "" }
+initialModel : Session -> String -> Model
+initialModel session fileName =
+    { session = session
+    , fileName = fileName
+    , fileContent = ""
+    }
 
 
 initialCmd : String -> Cmd Msg
@@ -42,22 +51,37 @@ update model msg =
             ( model, Cmd.none )
 
         CodeChanged str ->
-            let
-                a =
-                    log str
-            in
-                ( { model | fileContent = str }, Cmd.none )
+            ( { model | fileContent = str }, Cmd.none )
+
+        UpdateFile ->
+            ( model, Http.send FileUpdated (Api.updateFile model.fileName model.fileContent) )
+
+        FileUpdated _ ->
+            ( model, Cmd.none )
+
+        DeleteFile ->
+            ( model, Http.send FileDeleted (Api.deleteFile model.fileName) )
+
+        FileDeleted _ ->
+            ( model, Router.navigate (navKey model.session) Router.FileList )
 
 
 view : Model -> Html Msg
 view model =
     div []
-        [ Html.node "code-mirror-editor"
-            [ Html.Attributes.property "editorValue" <| Json.Encode.string model.fileContent
-            , Html.Events.on "editorChanged" <|
-                Json.Decode.map CodeChanged <|
-                    Json.Decode.at [ "target", "editorValue" ] <|
-                        Json.Decode.string
-            ]
-            []
+        [ button [ Html.Events.onClick UpdateFile, class "primary" ] [ text "update" ]
+        , button [ Html.Events.onClick DeleteFile, class "secondary" ] [ text "delete" ]
+        , editor model
         ]
+
+
+editor : Model -> Html Msg
+editor model =
+    Html.node "code-mirror-editor"
+        [ Html.Attributes.property "editorValue" <| Json.Encode.string model.fileContent
+        , Html.Events.on "editorChanged" <|
+            Json.Decode.map CodeChanged <|
+                Json.Decode.at [ "target", "editorValue" ] <|
+                    Json.Decode.string
+        ]
+        []

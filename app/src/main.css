@@ -1,5 +1,12 @@
+@import "../node_modules/mini.css/dist/mini-default.css";
+@import "../node_modules/codemirror/lib/codemirror.css";
+
 .text-danger {
   color: red;
+}
+
+.CodeMirror {
+  height: auto;
 }
 
 .login-page {
